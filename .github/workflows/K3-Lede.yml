@@ -1,19 +1,10 @@
-#
-# Copyright (c) 2020-2024 JE668 <https://github.com/JE668>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/JE668/Phicomm-K3-LEDE-Firmware-Lean
-# Description: Build OpenWrt using GitHub Actions
-#
-
-name: Build OpenWrt
+name: K3-Lede
 
 on:
-  repository_dispatch:
   workflow_dispatch:
-
+  workflow_call:
+  schedule:
+    - cron: 0 16 * * 4
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
@@ -165,24 +156,6 @@ jobs:
         rm -rf packages feeds.buildinfo version.buildinfo
         echo "KERNEL=$(cat *.manifest | grep ^kernel | cut -d- -f2 | tr -d ' ')" >> $GITHUB_ENV
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
-        
-    - name: 发布到文叔叔网盘
-      id: WENSHUSHU
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WENSHUSHU == 'true' && !cancelled()
-      run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer wss -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee WENSHUSHU.log
-          echo "::warning file=WENSHUSHU.cn::$(cat WENSHUSHU.log | grep https)"
-          echo "url=$(cat WENSHUSHU.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
-
-    - name: 生成Tag标识
-      id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      run: |
-        echo "release_tag=K3Lite-lede-$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-        touch release.txt
-        [ $UPLOAD_WENSHUSHU = true ] && echo "🔗 [WENSHUSHU](${{ steps.WENSHUSHU.outputs.url }})" >> release.txt
-        echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件到Artifact - Upload Firmware To Artifact
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
@@ -207,7 +180,7 @@ jobs:
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🚀 内核版本: ${{ env.KERNEL }}
-          - 🌐 默认地址: 192.168.11.1
+          - 🌐 默认地址: 192.168.111.1
           - 🔑 默认密码: password
           ### 🧊 固件版本
           - 最后一次➦[主源码](${{ env.REPO_URL }})更新记录
