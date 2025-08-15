@@ -1,13 +1,3 @@
-#
-# Copyright (c) 2020-2024 JE668 <https://github.com/JE668>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# File: .github/workflows/update-checker.yml
-# Description: Source code update checker
-#
-
 name: Update Checker
 
 env:
